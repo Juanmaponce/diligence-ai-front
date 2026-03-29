@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { nanoid } from "nanoid";
 import { Button } from "@/components/ui/button";
 import { Dropzone } from "@/components/upload/Dropzone";
@@ -26,10 +26,13 @@ export function StepUpload({
   uploadedDocuments,
   onNext,
 }: StepUploadProps) {
+  const reactId = useId();
   const [inputMode, setInputMode] = useState<InputMode>("file");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [rawText, setRawText] = useState("");
-  const [docId, setDocId] = useState(() => `doc-${nanoid(8)}`);
+  // useId() is stable between server and client — avoids hydration mismatch.
+  // nanoid is only called in event handlers (resetForm) where it's always client-side.
+  const [docId, setDocId] = useState(() => `doc-${reactId.replace(/[^a-z0-9]/gi, "")}`);
   const [metadata, setMetadata] = useState<DocumentMetadata>({});
   const [lastIndexed, setLastIndexed] = useState<UploadedDocument | null>(null);
 

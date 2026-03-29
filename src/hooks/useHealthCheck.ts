@@ -5,7 +5,7 @@ import apiClient from "@/lib/api-client";
 import type { HealthResponse } from "@/types/api";
 
 export function useHealthCheck() {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ["health"],
     queryFn: async () => {
       const res = await apiClient.get<HealthResponse>(
@@ -17,8 +17,10 @@ export function useHealthCheck() {
     retry: 1,
   });
 
+  // Use isPending (status === 'pending') rather than isLoading (isPending && isFetching)
+  // so the server render matches the client's initial render — server never sets isFetching=true.
   const isHealthy =
-    !isError && !isLoading && data?.status === "healthy";
+    !isError && !isPending && data?.status === "healthy";
 
-  return { isHealthy, isLoading, data };
+  return { isHealthy, isLoading: isPending, data };
 }
